@@ -3,7 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="LocalNotifications.MainPage">
 
-    <VerticalStackLayout>
+    <VerticalStackLayout Spacing="20">
+        <Grid RowDefinitions="Auto,Auto" >
+            <Label Grid.Row="0" Text="Title*" />
+            <Entry Grid.Row="1" x:Name="title" Placeholder="Enter notification title" />
+        </Grid>
+        <Grid RowDefinitions="Auto,Auto">
+            <Label Grid.Row="0" Text="Description*" />
+            <Editor Grid.Row="1" x:Name="description" Placeholder="Enter notification description" />
+        </Grid>
+        <Grid RowDefinitions="Auto,Auto">
+            <Label Grid.Row="0" Text="Notification Display Type*" />
+            <Picker Grid.Row="1" x:Name="type"  />
+        </Grid>
         <Button Text="Send Notification" Clicked="Button_Clicked" />
     </VerticalStackLayout>
 
