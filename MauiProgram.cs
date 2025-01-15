@@ -14,7 +14,9 @@ namespace LocalNotifications
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-
+            #if ANDROID
+            builder.Services.AddTransient<INotificationManagerService, LocalNotifications.Platforms.Android.NotificationManagerService>();
+            #endif
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
