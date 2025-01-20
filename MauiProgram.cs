@@ -16,6 +16,8 @@ namespace LocalNotifications
                 });
             #if ANDROID
             builder.Services.AddTransient<INotificationManagerService, LocalNotifications.Platforms.Android.NotificationManagerService>();
+            #elif IOS
+            builder.Services.AddTransient<INotificationManagerService, LocalNotifications.Platforms.iOS.NotificationManagerService>();
             #endif
 #if DEBUG
     		builder.Logging.AddDebug();
