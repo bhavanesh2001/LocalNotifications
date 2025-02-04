@@ -16,9 +16,9 @@ namespace LocalNotifications.Platforms.Android
             {
                 string title = intent.GetStringExtra(NotificationManagerService.TitleKey);
                 string message = intent.GetStringExtra(NotificationManagerService.MessageKey);
-
+                int type = intent.GetIntExtra(NotificationManagerService.NotificationTypeKey,0);
                 NotificationManagerService manager = NotificationManagerService.Instance ?? new NotificationManagerService();
-                manager.Show(title, message);
+                manager.Show(title, message,(NotificationType)type);
             }
         }
     }

@@ -3,11 +3,6 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using AndroidX.Core.App;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LocalNotifications.Platforms.Android
 {
@@ -21,11 +16,12 @@ namespace LocalNotifications.Platforms.Android
         const string ChannelDescription = "The default channel for notifications.";
 
         bool channelInitialized = false;
-        int messageId = 0;
+        int messageId = 1;
         int pendingIntentId = 0;
 
         public const string TitleKey = "title";
         public const string MessageKey = "message";
+        public const string NotificationTypeKey = "type";
 
         NotificationManagerCompat compatManager;
         public static NotificationManagerService Instance { get; private set; }
@@ -44,7 +40,7 @@ namespace LocalNotifications.Platforms.Android
         #endregion
 
         #region Public
-        public void SendNotification(string title, string message, DateTime? notifyTime = null)
+        public void SendNotification(string title, string message,NotificationType notificationType,DateTime? notifyTime = null)
         {
             if (!channelInitialized)
             {
@@ -56,6 +52,7 @@ namespace LocalNotifications.Platforms.Android
                 Intent intent = new Intent(Platform.AppContext, typeof(AlarmHandler));
                 intent.PutExtra(TitleKey, title);
                 intent.PutExtra(MessageKey, message);
+                intent.PutExtra(NotificationTypeKey, (int)notificationType);
                 intent.SetFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
 
                 var pendingIntentFlags = (Build.VERSION.SdkInt >= BuildVersionCodes.S)
@@ -69,12 +66,13 @@ namespace LocalNotifications.Platforms.Android
             }
             else
             {
-                Show(title, message);
+                Show(title, message,notificationType);
             }
         }
 
-        public void Show(string title, string message)
+        public void Show(string title, string message,NotificationType notificationType)
         {
+           
             Intent intent = new Intent(Platform.AppContext, typeof(MainActivity));
             intent.PutExtra(TitleKey, title);
             intent.PutExtra(MessageKey, message);
@@ -85,15 +83,49 @@ namespace LocalNotifications.Platforms.Android
                 : PendingIntentFlags.UpdateCurrent;
 
             PendingIntent pendingIntent = PendingIntent.GetActivity(Platform.AppContext, pendingIntentId++, intent, pendingIntentFlags);
+
+            //Base Part
             NotificationCompat.Builder builder = new NotificationCompat.Builder(Platform.AppContext, ChannelId)
                 .SetContentIntent(pendingIntent)
                 .SetContentTitle(title)
                 .SetContentText(message)
+                .SetOnlyAlertOnce(true)
                 .SetLargeIcon(BitmapFactory.DecodeResource(Platform.AppContext.Resources, Resource.Drawable.dotnet_logo))
                 .SetSmallIcon(Resource.Drawable.message_small);
 
+            if (notificationType == NotificationType.ProgressBarNotification)
+            {
+                builder.SetProgress(100, 0, false);
+                builder.SetOngoing(true);
+                builder.SetAutoCancel(false);
+                builder.SetPriority(NotificationCompat.PriorityHigh);
+            }
             Notification notification = builder.Build();
-            compatManager.Notify(messageId++, notification);
+            messageId = Random.Shared.Next();
+            compatManager.Notify(messageId, notification);
+
+            if (notificationType == NotificationType.ProgressBarNotification)
+            {
+                SimulateProgressBar(builder,messageId);
+            }
+           
+        }
+
+        private async void SimulateProgressBar(NotificationCompat.Builder builder,int messageId)
+        {
+            int progress = 0;
+            while (progress <= 100)
+            {
+                await Task.Delay(1000);
+                progress += 5;
+                builder.SetProgress(100, progress, false);
+                compatManager.Notify(messageId, builder.Build());
+            }
+
+            builder.SetProgress(0, 0, false)
+            .SetContentText("Download complete"); // Update the message
+
+            compatManager.Notify(messageId, builder.Build());
         }
         #endregion
 

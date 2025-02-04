@@ -7,9 +7,14 @@ using System.Threading.Tasks;
 namespace LocalNotifications
 {
    public interface INotificationManagerService
-{
-    event EventHandler<NotificationRecievedEventArgs> NotificationReceived;
-    void SendNotification(string title, string message, DateTime? notifyTime = null);
+   {
+        event EventHandler<NotificationRecievedEventArgs> NotificationReceived;
+        void SendNotification(string title, string message, NotificationType notificationType,DateTime? notifyTime = null);
+   }
 
-}
+   public enum NotificationType
+   {
+        SimpleNotification,
+        ProgressBarNotification
+   }
 }

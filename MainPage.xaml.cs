@@ -10,13 +10,15 @@ namespace LocalNotifications
         {
             InitializeComponent();
             notificationManager = IPlatformApplication.Current?.Services.GetService<INotificationManagerService>();
+            type.ItemsSource = Enum.GetNames(typeof(NotificationType));
 
         }
 
-        private void Button_Clicked(object sender, EventArgs e)
+        private async void Button_Clicked(object sender, EventArgs e)
         {
-            
-            notificationManager?.SendNotification(title.Text, description.Text);
+            if(await Permissions.CheckStatusAsync<Permissions.PostNotifications>() != PermissionStatus.Granted)
+               await Permissions.RequestAsync<Permissions.PostNotifications>();
+            notificationManager?.SendNotification(title.Text, description.Text,(NotificationType)type.SelectedIndex);
         }
     }
 
